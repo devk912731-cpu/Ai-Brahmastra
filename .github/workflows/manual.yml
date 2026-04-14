@@ -6,8 +6,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Ye line permission error ko fix karegi
+      - name: Fix permissions
+        run: sudo chown -R runner:docker /home/runner/work/Ai-Brahmastra/Ai-Brahmastra
+
       - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@master
+        uses: ArtemSBulgakov/buildozer-action@v1
         with:
           workdir: .
           buildozer_version: master
