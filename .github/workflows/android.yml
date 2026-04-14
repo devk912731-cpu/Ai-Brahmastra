@@ -11,10 +11,9 @@ jobs:
         uses: GearSnd/buildozer-action@v1
         with:
           workdir: .
-          buildozer_version: stable
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+          uses: actions/upload-artifact@v4
         with:
-          name: Brahmastra-App
+          name: package
           path: bin/*.apk
