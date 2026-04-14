@@ -1,17 +1,21 @@
-[app]
-title = Brahmastra
-package.name = brahmastra
-package.domain = org.raj.panini
-source.dir = .
-source.include_exts = py,png,jpg,kv,atlas
-version = 0.1
-requirements = python3,kivy,pillow
-orientation = portrait
-fullscreen = 0
-android.archs = arm64-v8a, armeabi-v7a
-android.allow_backup = True
-android.permissions = INTERNET, CAMERA, WRITE_EXTERNAL_STORAGE
+name: Build APK
+on: [push, pull_request]
 
-[buildozer]
-log_level = 2
-warn_on_root = 1
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build with Buildozer
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          workdir: .
+          buildozer_version: master
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: bin/*.apk
+
