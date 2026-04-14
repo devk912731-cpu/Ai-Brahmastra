@@ -1,14 +1,19 @@
-name: APK
+name: Build APK
 on: push
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: GearSnd/buildozer-action@v1
+
+      - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
         with:
           workdir: .
-      - uses: actions/upload-artifact@v4
+          buildozer_version: master
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          name: my-apk
+          name: Brahmastra-App
           path: bin/*.apk
