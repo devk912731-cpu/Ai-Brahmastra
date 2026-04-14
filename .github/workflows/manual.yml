@@ -15,5 +15,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Brahmastra-App
+          name: My-Brahmastra-App
           path: bin/*.apk
