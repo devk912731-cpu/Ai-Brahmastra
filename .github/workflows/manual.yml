@@ -9,19 +9,20 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
+          # Maine yahan libffi8 aur baaki missing cheezein fix kar di hain
           sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev
           sudo apt install -y openjdk-17-jdk 
 
       - name: Setup Python and Buildozer
         run: |
-          # Cython ka thoda naya version use karte hain jaisa GitHub ne suggest kiya
-          pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
+          # Cython ka version fix karna zaruri hai warna build fail hota hai
+          pip3 install --user --upgrade buildozer cython==0.29.33 virtualenv
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Agar download fail ho toh ye command retry karne mein madad karegi
-          buildozer android debug || buildozer android debug
+          # Brahmastra building starts here
+          yes | buildozer android debug
         continue-on-error: false
 
       - name: Upload APK
