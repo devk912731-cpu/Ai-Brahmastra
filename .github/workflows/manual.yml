@@ -9,20 +9,31 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
-          # Maine yahan libffi8 aur baaki missing cheezein fix kar di hain
           sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev
           sudo apt install -y openjdk-17-jdk 
 
+      - name: Cache Buildozer and Android SDK
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
+
       - name: Setup Python and Buildozer
         run: |
-          # Cython ka version fix karna zaruri hai warna build fail hota hai
-          pip3 install --user --upgrade buildozer cython==0.29.33 virtualenv
+          pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
 
-      - name: Build with Buildozer
+      - name: Build with Buildozer (With Retry Logic)
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Brahmastra building starts here
-          yes | buildozer android debug
+          # 3 baar koshish karega agar network fail hua toh
+          for i in {1..3}; do
+            echo "Attempt $i: Building APK..."
+            yes | buildozer android debug && break || sleep 60
+          done
         continue-on-error: false
 
       - name: Upload APK
