@@ -14,25 +14,26 @@ jobs:
 
       - name: Setup Python and Buildozer
         run: |
+          # Cython 0.29.36 version stability ke liye
           pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
 
-      - name: Build with Buildozer
+      - name: Build with Buildozer (Force Step)
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Force build command
-          yes | buildozer android debug
+          # Agar network error aaye toh ye step rukega nahi
+          yes | buildozer android debug || yes | buildozer android debug
           
-          # 🔱 FORCE FIND: Ye command APK ko dhoond kar 'brahmastra.apk' naam se root mein layegi
-          echo "Looking for APK..."
-          find . -name "*.apk" -exec cp {} ./brahmastra.apk \;
+          # 🔱 MAGIC JUGAD: Pure server mein jahan bhi APK banti hai, use dhoond kar bahar lao
+          echo "Forcing APK discovery..."
+          find . -name "*.apk" -exec cp {} ./brahmastra_final.apk \;
           
-          # Check agar file mili ya nahi (Debug ke liye)
-          ls -lh ./brahmastra.apk || echo "APK NOT FOUND IN ROOT"
+          # Check karne ke liye ki file bahar aayi ya nahi
+          ls -lh ./brahmastra_final.apk || echo "ERROR: APK NOT FOUND ANYWHERE"
         continue-on-error: false
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Brahmastra-Final-APK
-          # Ab server ko sirf ye ek file uthani hai, wo bhatkega nahi
-          path: brahmastra.apk
+          name: My-Brahmastra-App
+          # Ab server ko bhatakna nahi padega, file seedha samne hai
+          path: brahmastra_final.apk
