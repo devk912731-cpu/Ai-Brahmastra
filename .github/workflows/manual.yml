@@ -9,31 +9,41 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev
-          sudo apt install -y openjdk-17-jdk 
+          sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev openjdk-17-jdk
 
       - name: Setup Python and Buildozer
         run: |
-          # Cython 0.29.36 version stability ke liye
           pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
 
-      - name: Build with Buildozer (Force Step)
+      - name: Build with Buildozer (GitHub Recommended Retry)
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Agar network error aaye toh ye step rukega nahi
-          yes | buildozer android debug || yes | buildozer android debug
+          # GitHub ne kaha 3 baar retry karo, toh hum 3 baar karenge
+          for attempt in {1..3}; do
+            echo "Build attempt $attempt/3..."
+            if yes | buildozer android debug; then
+              echo "Build Successful!"
+              break
+            fi
+            echo "Attempt $attempt failed, retrying in 15 seconds..."
+            sleep 15
+          done
           
-          # 🔱 MAGIC JUGAD: Pure server mein jahan bhi APK banti hai, use dhoond kar bahar lao
-          echo "Forcing APK discovery..."
+          # 🔱 APK Discovery: Chahe jahan bhi banti ho, dhoond kar bahar lao
+          echo "Looking for APK in all folders..."
           find . -name "*.apk" -exec cp {} ./brahmastra_final.apk \;
           
-          # Check karne ke liye ki file bahar aayi ya nahi
-          ls -lh ./brahmastra_final.apk || echo "ERROR: APK NOT FOUND ANYWHERE"
+          # Check ki file mili ya nahi
+          if [ -f ./brahmastra_final.apk ]; then
+            echo "APK found and ready!"
+          else
+            echo "ERROR: APK NOT FOUND"
+            exit 1
+          fi
         continue-on-error: false
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: My-Brahmastra-App
-          # Ab server ko bhatakna nahi padega, file seedha samne hai
+          name: Brahmastra-Final-Download
           path: brahmastra_final.apk
