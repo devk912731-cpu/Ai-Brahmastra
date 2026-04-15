@@ -9,6 +9,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
+          # libffi8 install kar rahe hain taaki dependency error na aaye
           sudo apt install -y python3-pip build-essential git python3 python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libssl-dev libjpeg-dev zlib1g-dev libffi8 liblzma-dev uuid-dev
           sudo apt install -y openjdk-17-jdk 
 
@@ -24,21 +25,26 @@ jobs:
 
       - name: Setup Python and Buildozer
         run: |
+          # Cython 0.29.36 version use kar rahe hain stability ke liye
           pip3 install --user --upgrade buildozer cython==0.29.36 virtualenv
 
       - name: Build with Buildozer (With Retry Logic)
         run: |
           export PATH=$PATH:$HOME/.local/bin
+          # Agar network error (404/Broken Pipe) aaye toh ye automatic retry karega
           for i in {1..3}; do
             echo "Attempt $i: Building APK..."
             yes | buildozer android debug && break || sleep 60
           done
+          
+          # 🔱 MAGIC COMMAND: APK ko dhoond kar main folder mein copy karega
+          echo "Finding APK and moving it to root..."
+          find . -name "*.apk" -exec cp {} . \;
         continue-on-error: false
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Brahmastra-Final-APK
-          # Is line ko dhyaan se badlo, ye 100% kaam karega
-          path: ./**/*.apk
-
+          # Ab file seedha root mein hogi toh GitHub ko turant mil jayegi
+          path: ./*.apk
